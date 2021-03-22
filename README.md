@@ -368,7 +368,7 @@ import Data.Maybe (mapMaybe, fromMaybe)
 ```
 
 Fixeu-vos que hi ha dos paquets que no tindreu per defecte, per tant us caldrà instal·lar-los.
-*No podeu utilitzar cap altra paquet* (i no us cal).
+*No podeu utilitzar cap altre paquet* (i no us cal).
 
 La vostra entrega ha de consistir en **un sol fitxer** `Pallus.hs`, degudament comentat, fent explícites les decisions que heu hagut de prendre.
 
