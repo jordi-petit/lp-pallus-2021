@@ -56,7 +56,7 @@ data Atom = Atom String [ Term ]
     deriving (Eq, Show)
 ```
 
-Finalment, un terme és una variable (Var ...) o una constant (Symbol, Sym ...):
+Finalment, un terme és una variable (`Var ...`) o una constant (*Symbol*, `Sym ...`):
 
 ```haskell
 data Term = Var String | Sym String
@@ -67,14 +67,18 @@ data Term = Var String | Sym String
 
 Podeu fer servir *fields*, que no hem explicat al curs però són molt fàcils de fer servir. L'avantatge dels *fields* és que creen de franc funcions consultores pels elements del tipus. En el nostre cas, podriem definir:
 
-    data Regla = Regla { _cap::Atom, _cos::[ Atom ] }
+```haskell
+data Regla = Regla { _cap::Atom, _cos::[ Atom ] }
+```
 
 i ja tenim les funcions `_cap r` i `_cos r` (on `r` és una Regla) per treure els components de la regla, sense haver de definir-les nosaltres.
 
 També podriem definir:
 
-    data Atom = Atom { _nomPredicat::String, _termes::[ Term ] }
-        deriving (Eq, Show)
+```haskell
+data Atom = Atom { _nomPredicat::String, _termes::[ Term ] }
+    deriving (Eq, Show)
+```
 
 Mireu aquesta web per saber-ne més: [https://www.haskell.org/tutorial/moretypes.html](https://www.haskell.org/tutorial/moretypes.html)
 
