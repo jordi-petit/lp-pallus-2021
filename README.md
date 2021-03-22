@@ -195,7 +195,7 @@ pr =
 El procés iteratiu que hem mencionat comença amb una base de coneixement buida `kb0 = []`. Anem iterant una funció que podem anomenar, per exemple, `consequencia :: Programa -> BaseConeixement -> BaseConeixement` i anem generant nous àtoms *ground* que afegim a la base de coneixement:
 
 ```haskell
-    let kb1 = consequencia pr kb0
+let kb1 = consequencia pr kb0
 ```
 
 Ara `kb1` és (*pretty printed*): 
@@ -283,7 +283,7 @@ El resultat d'aquest procés serà aparellar els termes del conseqüent amb nom 
 
 Aquestes són les dues possibles respostes (dues sustitucions), tal com hem vist a l'exemple de més amunt. Naturalment, aquesta sortida està poc elaborada estèticament, vosaltres la podeu fer més maca.
 
-#Avaluar Regles
+# Avaluar Regles
 
 Ara bé, com avaluem una regla per a que ens doni més àtoms *ground*? Ens anirà bé fer una funció:
 
@@ -337,7 +337,7 @@ sustitucioBuida :: Sustitucio
 sustitucioBuida = []
 ```
 
-La funciò `avaluaAtom` agafa una sustitució de la llista, l'executa sobre l'àtom, i després el resultat mira d'unificar-lo amb els àtoms de la base de coneixement. Això ho fem sobre totes les sustitucions de la llista. El resultat serà una llista de possibles sustitucions.
+La funciò `avaluaAtom kb atom llista` agafa una sustitució de la `llista`, l'executa sobre l'àtom, i després el resultat mira d'unificar-lo amb els àtoms de la base de coneixement. Això ho fem sobre totes les sustitucions de la `llista`. El resultat serà una llista de possibles sustitucions.
 
 La funció `unifica atom1 atom2` retorna una (`Just`) sustitució si es poden unificar `atom1` i `atom2` o `Nothing` si no és possible la unificació (la funció `mapMaybe` us pot ser útil dins d'`avaluaAtom`). Penseu que tal i com estem fent el programa, `atom2` *sempre* serà *ground*. Com funciona? Dos àtoms, per poder-se unificar, han de tenir el mateix nom (`_nomPredicat` si feu servir *fields*). Després, si tenen el mateix nom, hem d'anar terme per terme de cada àtom, aparellats, comprovant que siguin la mateixa constant (en altre cas no s'unifiquen) o bé que siguin parelles (variable, constant). Aquí hem de tenir en compte una subtilesa, i és que no podem unificar la mateixa variable amb dues constants diferents. Veiem uns exemples (els farem en notació PALLÚS en lloc de fer servir la representació haskell):
 
