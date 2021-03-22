@@ -136,13 +136,15 @@ hauria de generar una resposta per cada pregunta, en linies separades. Per exemp
     false
     true
     true
-    [[(Var "Ancestre",Sym "brooke")],[(Var "Ancestre",Sym "ana")],[(Var "Ancestre",Sym "xerces")]]
+    [[(Var "Ancestre",Sym "brooke")],  [(Var "Ancestre",Sym "ana")],  [(Var "Ancestre",Sym "xerces")]]
     [[(Var "X",Sym "brooke")]]
-    [[(Var "X",Sym "ana"),(Var "Y",Sym "brooke")],[(Var "X",Sym "xerces"),(Var "Y",Sym "brooke")]]
+    [[(Var "X",Sym "ana"),(Var "Y",Sym "brooke")],  [(Var "X",Sym "xerces"),(Var "Y",Sym "brooke")]]
 
 Fixeu-vos que s'han fet servir les estructures de dades definides més amunt, i que el resultat, quan és diferent de booleà, consisteix en llistes de tuples, on cada tupla representa una sustitució (variable, constant). Definirem doncs:
 
-    type Sustitucio = [ (Term, Term) ]     -- [(variable, constant), (variable, constant), ...]
+```haskell
+type Sustitucio = [ (Term, Term) ]     -- [(variable, constant), (variable, constant), ...]
+```
 
 Fixeu-vos que l'abast (*scope*) de les variables és la regla o la *query* on es troben, no va més enllà. Així, fer servir el mateix nom per variables de diferents regles no hauria de provocar cap conflicte. Fixeu-vos també que NO existeix la negació de predicats.
 
@@ -154,7 +156,9 @@ Donat **un programa** (una llista de regles) i **<u>una</u>** **pregunta** (regl
 
 Per continuar la discussió ens caldrà definir el concepte de *Base de Coneixement*:
 
+```haskell
 type BaseConeixement = [ Atom ]
+```
 
 on tots els àtoms d'una base de coneixement són *ground* (el tipus, però, no ho reflecteix).
 
@@ -175,87 +179,107 @@ Tenim el programa PALLÚS, més <u>una</u> query:
 
 que té la representació Haskell (que haurà de generar el vostre *parser*), d'acord als tipus que hem definit més amunt (estem utilitzant *fields*):
 
-    pr :: Programa
-    pr =
-      [
-        Regla {_cap = Atom {_nomPredicat = "progenitor", _termes = [Sym "ana",Sym "brooke"]}, _cos = []},
-        Regla {_cap = Atom {_nomPredicat = "progenitor", _termes = [Sym "xerces",Sym "brooke"]}, _cos = []},
-        Regla {_cap = Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]}, _cos = []},
-        Regla {_cap = Atom {_nomPredicat = "ancestre", _termes = [Var "X",Var "Y"]}, _cos = [Atom {_nomPredicat = "progenitor", _termes = [Var "X",Var "Z"]},Atom {_nomPredicat = "ancestre", _termes = [Var "Z",Var "Y"]}]},
-        Regla {_cap = Atom {_nomPredicat = "ancestre", _termes = [Var "X",Var "Y"]}, _cos = [Atom {_nomPredicat = "progenitor", _termes = [Var "X",Var "Y"]}]},
-        Regla {_cap = Atom {_nomPredicat = "query", _termes = [Var "X",Var "Y"]}, _cos = [Atom {_nomPredicat = "ancestre", _termes = [Var "X",Var "Y"]},Atom {_nomPredicat = "ancestre", _termes = [Var "Y",Sym "damocles"]}]}
-      ]
+```haskell
+pr :: Programa
+pr =
+  [
+    Regla {_cap = Atom {_nomPredicat = "progenitor", _termes = [Sym "ana",Sym "brooke"]}, _cos = []},
+    Regla {_cap = Atom {_nomPredicat = "progenitor", _termes = [Sym "xerces",Sym "brooke"]}, _cos = []},
+    Regla {_cap = Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]}, _cos = []},
+    Regla {_cap = Atom {_nomPredicat = "ancestre", _termes = [Var "X",Var "Y"]}, _cos = [Atom {_nomPredicat = "progenitor", _termes = [Var "X",Var "Z"]},Atom {_nomPredicat = "ancestre", _termes = [Var "Z",Var "Y"]}]},
+    Regla {_cap = Atom {_nomPredicat = "ancestre", _termes = [Var "X",Var "Y"]}, _cos = [Atom {_nomPredicat = "progenitor", _termes = [Var "X",Var "Y"]}]},
+    Regla {_cap = Atom {_nomPredicat = "query", _termes = [Var "X",Var "Y"]}, _cos = [Atom {_nomPredicat = "ancestre", _termes = [Var "X",Var "Y"]},Atom {_nomPredicat = "ancestre", _termes = [Var "Y",Sym "damocles"]}]}
+  ]
+```
 
-El procés iteratiu que hem mencionat comença amb una bas de coneixement buida `kb0 = []`. Anem iterant una funció que podem anomenar, per exemple, `consequencia :: Programa -> BaseConeixement -> BaseConeixement` i anem generant nous àtoms *ground* que afegim a la base de coneixement:
+El procés iteratiu que hem mencionat comença amb una base de coneixement buida `kb0 = []`. Anem iterant una funció que podem anomenar, per exemple, `consequencia :: Programa -> BaseConeixement -> BaseConeixement` i anem generant nous àtoms *ground* que afegim a la base de coneixement:
 
+```haskell
     let kb1 = consequencia pr kb0
+```
 
 Ara `kb1` és (*pretty printed*): 
 
-    [
-     Atom {_nomPredicat = "progenitor", _termes = [Sym "ana",Sym "brooke"]},
-     Atom {_nomPredicat = "progenitor", _termes = [Sym "xerces",Sym "brooke"]},
-     Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]}
-    ]
+```haskell
+[
+ Atom {_nomPredicat = "progenitor", _termes = [Sym "ana",Sym "brooke"]},
+ Atom {_nomPredicat = "progenitor", _termes = [Sym "xerces",Sym "brooke"]},
+ Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]}
+]
+```
 
 Com `kb1 /= kb0`, continuem...
 
-    let kb2 = consequencia pr kb1
+```haskell
+let kb2 = consequencia pr kb1
+```
 
 resultant en una nova base de coneixement `kb2`:
 
-    [
-     Atom {_nomPredicat = "progenitor", _termes = [Sym "ana",Sym "brooke"]},
-     Atom {_nomPredicat = "progenitor", _termes = [Sym "xerces",Sym "brooke"]},
-     Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "brooke"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "brooke"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "brooke",Sym "damocles"]}
-    ]
+```haskell
+[
+ Atom {_nomPredicat = "progenitor", _termes = [Sym "ana",Sym "brooke"]},
+ Atom {_nomPredicat = "progenitor", _termes = [Sym "xerces",Sym "brooke"]},
+ Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "brooke"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "brooke"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "brooke",Sym "damocles"]}
+]
+```
 
 Ara `kb2 /= kb1`, per tant no podem aturar-nos...
 
-    let kb3 = consequencia pr kb2
+```haskell
+let kb3 = consequencia pr kb2
+```
 
 i obtenim `kb3`:
 
-    [
-     Atom {_nomPredicat = "progenitor", _termes = [Sym "ana",Sym "brooke"]},
-     Atom {_nomPredicat = "progenitor", _termes = [Sym "xerces",Sym "brooke"]},
-     Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "brooke"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "brooke"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "brooke",Sym "damocles"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "damocles"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "damocles"]},
-     Atom {_nomPredicat = "query", _termes = [Sym "ana",Sym "brooke"]},
-     Atom {_nomPredicat = "query", _termes = [Sym "xerces",Sym "brooke"]}
-    ]
+```haskell
+[
+ Atom {_nomPredicat = "progenitor", _termes = [Sym "ana",Sym "brooke"]},
+ Atom {_nomPredicat = "progenitor", _termes = [Sym "xerces",Sym "brooke"]},
+ Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "brooke"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "brooke"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "brooke",Sym "damocles"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "damocles"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "damocles"]},
+ Atom {_nomPredicat = "query", _termes = [Sym "ana",Sym "brooke"]},
+ Atom {_nomPredicat = "query", _termes = [Sym "xerces",Sym "brooke"]}
+]
+```
 
 `kb3 /= kb2`, així que fem una iteració més...
 
-    let kb4 = consequencia pr kb3
+```haskell
+let kb4 = consequencia pr kb3
+```
 
 obtenint `kb4`,
 
-    [
-     Atom {_nomPredicat = "progenitor", _termes = [Sym "ana",Sym "brooke"]},
-     Atom {_nomPredicat = "progenitor", _termes = [Sym "xerces",Sym "brooke"]},
-     Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "brooke"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "brooke"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "brooke",Sym "damocles"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "damocles"]},
-     Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "damocles"]},
-     Atom {_nomPredicat = "query", _termes = [Sym "ana",Sym "brooke"]},
-     Atom {_nomPredicat = "query", _termes = [Sym "xerces",Sym "brooke"]}
-    ]
+```haskell
+[
+ Atom {_nomPredicat = "progenitor", _termes = [Sym "ana",Sym "brooke"]},
+ Atom {_nomPredicat = "progenitor", _termes = [Sym "xerces",Sym "brooke"]},
+ Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "brooke"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "brooke"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "brooke",Sym "damocles"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "damocles"]},
+ Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "damocles"]},
+ Atom {_nomPredicat = "query", _termes = [Sym "ana",Sym "brooke"]},
+ Atom {_nomPredicat = "query", _termes = [Sym "xerces",Sym "brooke"]}
+]
+```
 
 I acabem, ja que `kb3 == kb4`.
 
 El resultat d'aquest procés serà aparellar els termes del conseqüent amb nom `query` (que són només variables `[Var "X",Var "Y"]`) amb els termes dels àtoms de `kb4` que tinguin nom `query`. Hi ha dos possibles solucions, ``[Sym "ana",Sym "brooke"]`` i ``[Sym "xerces",Sym "brooke"]``. Per tant, una manera de representar les solucions és fent servir una llista de sustitucions (tal com hem definit el tipus més amunt):
 
-    [ [(Var "X",Sym "ana"),(Var "Y",Sym "brooke")] , [(Var "X",Sym "xerces"),(Var "Y",Sym "brooke")] ]
+```haskell
+[ [(Var "X",Sym "ana"),(Var "Y",Sym "brooke")] , [(Var "X",Sym "xerces"),(Var "Y",Sym "brooke")] ]
+```
 
 Aquestes són les dues possibles respostes (dues sustitucions), tal com hem vist a l'exemple de més amunt. Naturalment, aquesta sortida està poc elaborada estèticament, vosaltres la podeu fer més maca.
 
@@ -263,25 +287,35 @@ Aquestes són les dues possibles respostes (dues sustitucions), tal com hem vist
 
 Ara bé, com avaluem una regla per a que ens doni més àtoms *ground*? Ens anirà bé fer una funció:
 
-    avaluaRegla :: BaseConeixement -> Regla -> BaseConeixement
+```haskell
+avaluaRegla :: BaseConeixement -> Regla -> BaseConeixement
+```
 
 que ens doni els àtoms *ground* que poden generar-se a partir de la regla. Per exemple, si la regla és un fet `progenitor brooke damocles.`:
 
-    pr !! 2 --> Regla {_cap = Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]}, _cos = []}
+```haskell
+pr !! 2 --> Regla {_cap = Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]}, _cos = []}
+```
 
 aleshores
 
-    avaluaRegla kb (pr !! 2) --> [Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]}]
+```haskell
+avaluaRegla kb (pr !! 2) --> [Atom {_nomPredicat = "progenitor", _termes = [Sym "brooke",Sym "damocles"]}]
+```
 
 Com aquest és un fet del programa, el resultat, independentment de la base de coneixement `kb` que fem servir, serà el mateix fet. En canvi, si tenim la regla `progenitor X Z & ancestre Z Y => ancestre X Y.`
 
-    pr !! 3 --> Regla {_cap = Atom {_nomPredicat = "ancestre", _termes = [Var "X",Var "Y"]}, _cos = [Atom {_nomPredicat = "progenitor", _termes = [Var "X",Var "Z"]},Atom {_nomPredicat = "ancestre", _termes = [Var "Z",Var "Y"]}]}
+```haskell
+pr !! 3 --> Regla {_cap = Atom {_nomPredicat = "ancestre", _termes = [Var "X",Var "Y"]}, _cos = [Atom {_nomPredicat = "progenitor", _termes = [Var "X",Var "Z"]},Atom {_nomPredicat = "ancestre", _termes = [Var "Z",Var "Y"]}]}
+```
 
 podem avaluar-la en diferents bases de coneixement, que donarà resultats diferents:
 
-    avaluaRegla kb1 (pr !! 3) --> []
-    avaluaRegla kb2 (pr !! 3) --> [Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "damocles"]},Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "damocles"]]
-    avaluaRegla kb3 (pr !! 3) --> [Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "damocles"]},Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "damocles"]]
+```haskell
+avaluaRegla kb1 (pr !! 3) --> []
+avaluaRegla kb2 (pr !! 3) --> [Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "damocles"]},Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "damocles"]]
+avaluaRegla kb3 (pr !! 3) --> [Atom {_nomPredicat = "ancestre", _termes = [Sym "ana",Sym "damocles"]},Atom {_nomPredicat = "ancestre", _termes = [Sym "xerces",Sym "damocles"]]
+```
 
 Es deixa com a treball personal mirar de pensar per quina raó passa això, i quina diferència hi ha entre `kb1` i `kb2` per a que tinguem aquests resultats diferents (pensar això us ajudarà a intuir millor el procés d'avaluació d'una regla). Fixeu-vos també que el resultat és el mateix quan fem servir `kb2` i `kb3`.
 
@@ -290,14 +324,18 @@ Es deixa com a treball personal mirar de pensar per quina raó passa això, i qu
 Finalment, ens caldrà poder avaluar àtoms. Això ho podem fer trobant els fets de la base de coneixements que tenen concordànça amb l'àtom en qüestió. Serà interessant processar l'àtom d'acord a una llista de possibles sustitucions
 i després **unificar** l'àtom amb els atom *ground* de la base de coneixement. Això exigirà tres funcions addicionals:
 
-    avaluaAtom :: BaseConeixement -> Atom -> [ Sustitucio ] -> [ Sustitucio ]
-    unifica :: Atom -> Atom -> Maybe Sustitucio
-    sustitueix :: Atom -> Sustitucio -> Atom
+```haskell
+avaluaAtom :: BaseConeixement -> Atom -> [ Sustitucio ] -> [ Sustitucio ]
+unifica :: Atom -> Atom -> Maybe Sustitucio
+sustitueix :: Atom -> Sustitucio -> Atom
+```
 
 i una constant
 
-    sustitucioBuida :: Sustitucio
-    sustitucioBuida = []
+```haskell
+sustitucioBuida :: Sustitucio
+sustitucioBuida = []
+```
 
 La funciò `avaluaAtom` agafa una sustitució de la llista, l'executa sobre l'àtom, i després el resultat mira d'unificar-lo amb els àtoms de la base de coneixement. Això ho fem sobre totes les sustitucions de la llista. El resultat serà una llista de possibles sustitucions.
 
@@ -319,13 +357,15 @@ La pràctica s'ha d'entregar no més tard de **diumenge 25 d'abril** a les 23:59
 
 El vostre programa ha de tenir la següent capçalera:
 
-    {-# LANGUAGE RecordWildCards #-}    -- per utilitzar fields
+```haskell
+{-# LANGUAGE RecordWildCards #-}    -- per utilitzar fields
 
-    import Data.Char (isUpper)
-    import Data.List (nub, isInfixOf)
-    import Data.List.Split (splitOn)    -- cal instal·lar: cabal install split
-    import Data.String.Utils (strip)    -- cal instal·lar: cabal install MissingH
-    import Data.Maybe (mapMaybe, fromMaybe)
+import Data.Char (isUpper)
+import Data.List (nub, isInfixOf)
+import Data.List.Split (splitOn)    -- cal instal·lar: cabal install split
+import Data.String.Utils (strip)    -- cal instal·lar: cabal install MissingH
+import Data.Maybe (mapMaybe, fromMaybe)
+```
 
 Fixeu-vos que hi ha dos paquets que no tindreu per defecte, per tant us caldrà instal·lar-los.
 *No podeu utilitzar cap altra paquet* (i no us cal).
