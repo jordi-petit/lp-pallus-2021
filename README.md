@@ -1,4 +1,4 @@
-# Implementació del Llenguatge de programació PALLÚS
+# Implementació del Llenguatge de programació PALLÚS™️
 
 > Programació Automàtica de Lògica Limitada i Ús Senzill
 
