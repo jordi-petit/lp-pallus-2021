@@ -372,6 +372,13 @@ Fixeu-vos que hi ha dos paquets que no tindreu per defecte, per tant us caldrà 
 
 La vostra entrega ha de consistir en **un sol fitxer** `Pallus.hs`, degudament comentat, fent explícites les decisions que heu hagut de prendre.
 
+# Avís
+
+Els vostres programes Pallús haurien d'estar en un fitxer de text. Aquest fitxer de text ha d'estar en format unix (salt de línia amb `\n`) i no en format Windows/DOS (salt de línia amb `\r` i `\n`). Hem observat problemes en les operacions de lectura en Haskell si el fitxer està en format Windows/DOS.
+Si treballeu en Windows, convé tenir-ho en compte.
+
+Aquest enllaç us pot ser útil: [https://phoenixnap.com/kb/convert-dos-to-unix](https://phoenixnap.com/kb/convert-dos-to-unix)
+
 
 
 
